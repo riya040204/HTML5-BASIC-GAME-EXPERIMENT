@@ -1,25 +1,548 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mini Platformer — Tile Crusader Prototype</title>
-  <link rel="stylesheet" href="css/style.css" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Riya — Interactive Portfolio (Aesthetic • Futuristic • Minimal)</title>
+
+<!-- model-viewer for 3D models -->
+<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+<!-- Font -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg-a: linear-gradient(135deg,#fdf2f8,#fff0f6);
+    --accent-a: #ff66b3;
+    --glass: rgba(255,255,255,0.6);
+    --card-a: rgba(255,255,255,0.7);
+
+    --bg-f: linear-gradient(135deg,#050319,#0b1026);
+    --accent-f: #7dd3fc;
+    --card-f: rgba(8,12,24,0.55);
+
+    --bg-m: linear-gradient(135deg,#f7f7fb,#ffffff);
+    --accent-m: #2b2b2b;
+    --card-m: rgba(255,255,255,0.85);
+
+    --radius: 18px;
+    --glass-border: rgba(255,255,255,0.14);
+    --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
+  }
+
+  /* Basic resets */
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:var(--font);-webkit-font-smoothing:antialiased;color:#0b1220}
+  a{color:inherit}
+
+  /* Container */
+  .site{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    transition:background 400ms ease;
+    background:var(--bg-a);
+  }
+
+  header{
+    display:flex;align-items:center;justify-content:space-between;padding:18px 28px;
+    backdrop-filter: blur(6px);
+  }
+  .brand{display:flex;align-items:center;gap:14px}
+  .logo{
+    width:68px;height:68px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:22px;color:white;box-shadow:0 10px 30px rgba(2,6,23,0.08);
+    transform:translateZ(0);
+  }
+  .brand h1{margin:0;font-size:18px}
+  nav{display:flex;gap:12px}
+  nav a{padding:8px 12px;border-radius:10px;text-decoration:none;font-weight:600;opacity:0.95}
+  nav a:hover{transform:translateY(-3px);transition:all .2s ease}
+
+  /* Layout */
+  .main{max-width:1180px;margin:20px auto;padding:18px;display:grid;grid-template-columns:1fr 360px;gap:20px;width:calc(100% - 48px)}
+  @media (max-width:980px){.main{grid-template-columns:1fr;padding:12px} .right{order:-1}}
+
+  /* Card style */
+  .card{border-radius:var(--radius);padding:18px;background:var(--card-a);border:1px solid var(--glass-border);box-shadow:0 10px 30px rgba(2,6,23,0.08);backdrop-filter: blur(8px)}
+  h2{margin-top:0}
+
+  /* Portrait canvas */
+  #portrait{width:100%;height:260px;border-radius:12px;border:1px dashed rgba(0,0,0,0.06);display:block}
+
+  /* Skills */
+  .skills{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.12);background:transparent;font-weight:600;transition:transform .2s ease}
+  .chip:hover{transform:translateY(-6px) scale(1.03)}
+
+  /* Model area */
+  .modelWrap{display:grid;gap:8px}
+  model-viewer{width:100%;height:320px;background:transparent;border-radius:12px;outline:none;border:1px solid rgba(0,0,0,0.06)}
+
+  /* media */
+  video,audio{width:100%;border-radius:10px;border:1px solid rgba(0,0,0,0.06);display:block}
+
+  /* form */
+  form{display:flex;flex-direction:column;gap:10px}
+  input,textarea,select{padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.08);outline:none}
+  .btn{padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+
+  /* Right column */
+  .right{display:flex;flex-direction:column;gap:16px}
+  .avatar{height:160px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#001}
+
+  /* Floating accent */
+  .floating{animation:floaty 6s ease-in-out infinite}
+  @keyframes floaty{0%{transform:translateY(0)}50%{transform:translateY(-10px)}100%{transform:translateY(0)}}
+
+  /* small footer */
+  footer{opacity:0.8;padding:18px;text-align:center}
+
+  /* Theme variations — set via .theme-{x} on .site */
+  /* Aesthetic (pastel, soft glow) */
+  .theme-a{background:linear-gradient(135deg,#fff7fb,#fff0f6)}
+  .theme-a .logo{background:linear-gradient(135deg,#ff66b3,#ff9acb);color:#fff}
+  .theme-a .card{background:rgba(255,255,255,0.85);color:#2b2b2b;border:1px solid rgba(255,255,255,0.6)}
+  .theme-a h2{color:#ff4d94}
+  .theme-a nav a{color:#2b2b2b}
+
+  /* Futuristic (neon on dark) */
+  .theme-f{background:linear-gradient(135deg,#03031a,#07102a);color:#cfefff}
+  .theme-f .logo{background:linear-gradient(90deg,#0ea5a3,#7c3aed);color:#000}
+  .theme-f .card{background:rgba(8,12,24,0.6);color:#dfeeff;border:1px solid rgba(125,211,252,0.06)}
+  .theme-f h2{color:#7dd3fc}
+  .theme-f nav a{color:#dfeeff}
+
+  /* Minimal (clean white) */
+  .theme-m{background:linear-gradient(180deg,#f8fafc,#eef2ff);color:#071124}
+  .theme-m .logo{background:linear-gradient(90deg,#dbeafe,#dbeafe);color:#071124}
+  .theme-m .card{background:rgba(255,255,255,0.95);color:#071124;border:1px solid rgba(10,20,30,0.04)}
+  .theme-m h2{color:#111827}
+  .theme-m nav a{color:#111827}
+
+  /* Theme toolbar */
+  .toolbar{display:flex;gap:8px;align-items:center}
+  .themeBtn{padding:8px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);cursor:pointer;background:transparent}
+  .themeBtn.active{box-shadow:0 8px 30px rgba(0,0,0,0.12);transform:translateY(-3px)}
+
+  /* section separators */
+  .sep{height:12px}
+
+  /* small screens */
+  @media (max-width:600px){
+    header{flex-direction:column;gap:12px}
+    .brand h1{font-size:16px}
+    .main{grid-template-columns:1fr;padding:12px}
+    model-viewer{height:220px}
+  }
+</style>
 </head>
 <body>
-  <header>
-    <h1>Mini Platformer</h1>
-    <div id="hud">
-      <span id="score">Score: 0</span>
-      <span id="lives">Lives: 3</span>
-      <span id="info">Controls: ← → / A D to move, ↑ / W / Space to jump</span>
-    </div>
-  </header>
+  <div id="site" class="site theme-a" data-theme="a">
+    <header>
+      <div class="brand">
+        <div id="logo" class="logo">RP</div>
+        <div>
+          <h1>Riya Patel</h1>
+          <div style="font-size:13px;opacity:0.8">Interactive portfolio · HTML5 · Games · Web</div>
+        </div>
+      </div>
 
-  <main>
-    <canvas id="gameCanvas" width="960" height="540"></canvas>
-  </main>
+      <div class="toolbar" aria-hidden="false">
+        <nav>
+          <a href="#about">About</a>
+          <a href="#work">Work</a>
+          <a href="#model">Model</a>
+          <a href="#contact">Contact</a>
+        </nav>
 
-  <script src="js/game.js"></script>
+        <!-- Theme buttons -->
+        <div style="width:16px"></div>
+        <button class="themeBtn active" data-theme="a" title="Aesthetic (soft)"><span>🌸</span></button>
+        <button class="themeBtn" data-theme="f" title="Futuristic (neon)"><span>⚡</span></button>
+        <button class="themeBtn" data-theme="m" title="Minimal (clean)"><span>✨</span></button>
+      </div>
+    </header>
+
+    <main class="main" role="main">
+      <!-- LEFT: main content -->
+      <section class="card" id="about" aria-labelledby="aboutTitle">
+        <h2 id="aboutTitle">About — Two tones (Friendly / Professional)</h2>
+
+        <!-- Tone toggle -->
+        <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+          <label style="font-weight:600">Tone</label>
+          <select id="toneSelect" style="padding:8px;border-radius:10px">
+            <option value="friendly">Friendly</option>
+            <option value="professional">Professional & Portfolio</option>
+            <option value="both">Both (Show both)</option>
+          </select>
+        </div>
+
+        <div id="aboutContent">
+          <!-- Friendly (personal) -->
+          <article id="friendlyTone" class="floating" style="display:block">
+            <h3>Friendly</h3>
+            <p>Hey — I’m <strong>Riya</strong>. I love building playful learning experiences and small games that teach. I sketch ideas on paper, prototype in Unity, and then make interactive demos in WebGL or web pages. When not designing, I read mythic stories and experiment with sound design for ambience.</p>
+            <p>Fun facts: I turned my college project into a 2D Ramayan game with characters, weapons, and a lore-based storyboard — and I still love tweaking the UI animations.</p>
+          </article>
+
+          <!-- Professional (portfolio) -->
+          <article id="profTone" style="display:none">
+            <h3>Professional</h3>
+            <p>I’m a student and developer working across game design, prototyping, and interactive web experiences. Skills include Unity (C#), HTML5/CSS3/JavaScript, asset pipeline (Blender → Unity), and building user-centered learning games. I focus on accessibility, stable builds, and clean code.</p>
+            <p>Selected projects: 2D Ramayan Game (UI, scenes, character systems), prototypes using Vuforia & ARCore, and a MariaDB-backed analytics API for demo airline efficiency dashboards.</p>
+          </article>
+        </div>
+
+        <div class="sep"></div>
+
+        <!-- canvas portrait -->
+        <h3>Illustration — Canvas portrait</h3>
+        <canvas id="portrait" width="800" height="360" aria-label="Decorative portrait canvas"></canvas>
+
+        <div style="margin-top:12px;">
+          <strong>Skills</strong>
+          <div class="skills" style="margin-top:8px">
+            <span class="chip">Unity</span>
+            <span class="chip">Blender</span>
+            <span class="chip">HTML5</span>
+            <span class="chip">Canvas</span>
+            <span class="chip">Storyboarding</span>
+            <span class="chip">Sound Design</span>
+            <span class="chip">Experiential learning</span>
+                            <!-- Experiential Learning Section -->
+<section id="experiential" class="exp-section">
+
+  <h2 class="exp-title">✨ Experiential Learning Journey ✨</h2>
+
+  <div class="exp-container">
+
+      <!-- Image -->
+      <div class="exp-image-card">
+        <img src="your-image.jpg" alt="Experiential Learning" class="exp-image">
+      </div>
+
+      <!-- Text Description -->
+      <div class="exp-text-card">
+        <h3>My Industry Immersion Program</h3>
+        <p>
+          I explored real-world tech environments through a 10-day experiential learning program
+          covering **Hyderabad** and **Pune**.  
+        </p>
+
+        <ul>
+          <li>🔹 Visited leading Hyderabad companies</li>
+          <li>🔹 Hands-on sessions at <strong>T-Hub</strong> & <strong>T-Works</strong></li>
+          <li>🔹 Industrial exposure at <strong>L&T Metro</strong> & <strong>BSNL</strong></li>
+          <li>🔹 Pune visit at <strong>Fovia</strong> — industry workshop</li>
+          <li>🔹 2-day Computer Vision masterclass with live demos</li>
+        </ul>
+
+        <p>
+          This journey deepened my understanding of the tech ecosystem and strengthened my
+          skills in innovation, research, and real-world implementation.
+        </p>
+      </div>
+<img src="riya.jpg" alt="My Photo" class="hero-img" width="260">
+
+
+  </div>
+</section>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: side column -->
+      <aside class="right">
+        <div class="card">
+          <div class="avatar" id="avatar" style="background:linear-gradient(90deg,#7c3aed,#06b6d4);color:#001">
+            Riya
+          </div>
+          <div style="margin-top:12px">
+            <strong>Contact</strong>
+            <p style="margin:6px 0 8px 0;font-size:14px;opacity:0.9">Student · Game Dev · web Dev</p>
+
+            <div style="display:flex;gap:8px;margin-top:6px;">
+              <button class="btn" id="saveProfile">Save theme</button>
+              <button class="btn" id="loadProfile">Load theme</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 id="work">Work — Media</h3>
+          <p style="margin:6px 0 10px 0">Short demos — audio & video (sample files included). Replace with your own files if needed.</p>
+          <audio controls src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+          <div style="height:10px"></div>
+          <video controls src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"></video>
+        </div>
+
+        <div class="card modelWrap" id="model">
+          <h3>Interactive 3D Model</h3>
+          <!-- model-viewer: sample public GLB from modelviewer examples -->
+          <model-viewer id="mv" src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+            alt="3D model: astronaut" ar auto-rotate camera-controls exposure="1" shadow-intensity="1">
+          </model-viewer>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="btn" id="toggleAuto">Toggle Rotate</button>
+            <button class="btn" id="downloadModel">Open Model Source</button>
+          </div>
+          <small style="opacity:0.8;display:block;margin-top:8px">        </div>
+      </aside>
+    </main>
+
+    <!-- Contact section (big) -->
+    <section class="card" style="max-width:1180px;margin:10px auto;padding:22px" id="contact">
+      <h2>Contact — send message</h2>
+      <form id="contactForm">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input id="name" placeholder="Your name" type="text" required style="flex:1;min-width:220px">
+          <input id="email" placeholder="Email" type="email" required style="flex:1;min-width:220px">
+          <input id="birthday" type="date" style="min-width:160px">
+          <input id="favcolor" type="color" value="#7dd3fc" title="Pick a color">
+        </div>
+        <textarea id="message" rows="4" placeholder="Write a short message..." style="margin-top:8px"></textarea>
+
+        <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+          <input id="file" type="file" accept="image/*">
+          <button class="btn" type="submit">Send</button>
+          <button class="btn" type="button" id="saveLocal">Save Locally</button>
+          <button class="btn" type="button" id="loadLocal">Load</button>
+          <button class="btn" type="button" id="clearLocal">Clear</button>
+        </div>
+
+        <div style="margin-top:10px;font-size:13px;color:rgba(0,0,0,0.6)">
+          <em>Form data is saved only in your browser's localStorage for demo purposes.</em>
+        </div>
+      </form>
+    </section>
+
+    <footer>
+      <small>Made with  by Riya — includes canvas, model-viewer, web storage, multimedia, transforms & animations</small>
+    </footer>
+  </div>
+
+<script>
+/* -----------------------
+   THEMING & UI INTERACTIONS
+   ----------------------- */
+const site = document.getElementById('site');
+const themeBtns = Array.from(document.querySelectorAll('.themeBtn'));
+const logo = document.getElementById('logo');
+
+// set theme based on saved preference
+const savedTheme = localStorage.getItem('rp_theme') || 'a';
+applyTheme(savedTheme);
+
+// theme button clicks
+themeBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const t = btn.dataset.theme;
+    applyTheme(t);
+    // visual active
+    themeBtns.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+function applyTheme(t){
+  // remove previous
+  site.classList.remove('theme-a','theme-f','theme-m');
+  if(t==='a'){ site.classList.add('theme-a'); site.dataset.theme='a'; logo.style.background='linear-gradient(135deg,#ff66b3,#ff9acb)'; }
+  if(t==='f'){ site.classList.add('theme-f'); site.dataset.theme='f'; logo.style.background='linear-gradient(90deg,#0ea5a3,#7c3aed)'; }
+  if(t==='m'){ site.classList.add('theme-m'); site.dataset.theme='m'; logo.style.background='linear-gradient(90deg,#dbeafe,#e6eefb)'; }
+  localStorage.setItem('rp_theme', t);
+}
+
+/* Save/load quick profile preference */
+document.getElementById('saveProfile').addEventListener('click', ()=>{
+  const t = site.dataset.theme || 'a';
+  localStorage.setItem('rp_theme', t);
+  alert('Theme saved locally ✨');
+});
+document.getElementById('loadProfile').addEventListener('click', ()=>{
+  const v = localStorage.getItem('rp_theme');
+  if(v) { applyTheme(v); alert('Theme loaded'); } else alert('No saved theme found');
+});
+
+/* -----------------------
+   TONE TOGGLE (friendly/professional)
+   ----------------------- */
+const tone = document.getElementById('toneSelect');
+const friendlyEl = document.getElementById('friendlyTone');
+const profEl = document.getElementById('profTone');
+
+tone.addEventListener('change', ()=>{
+  const v = tone.value;
+  friendlyEl.style.display = (v==='friendly' || v==='both') ? 'block' : 'none';
+  profEl.style.display = (v==='professional' || v==='both') ? 'block' : 'none';
+});
+
+/* -----------------------
+   Canvas portrait drawing — more personalized + small animation
+   ----------------------- */
+(function(){
+  const c = document.getElementById('portrait');
+  const ctx = c.getContext('2d');
+  const W = c.width, H = c.height;
+  // simple animated gradient background
+  let t=0;
+  function draw(){
+    t+=0.008;
+    // gradient that slowly shifts
+    const g = ctx.createLinearGradient(0,0,W,H);
+    const r1 = Math.floor(200 + 30*Math.sin(t*1.2));
+    const g1 = Math.floor(180 + 40*Math.cos(t*1.1));
+    g.addColorStop(0, `rgba(${r1},${g1},240,0.22)`);
+    g.addColorStop(1, `rgba(125,211,252,0.05)`);
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+
+    // Stylized avatar (simple shapes)
+    ctx.save(); ctx.translate(W/2, H/2 + 10);
+    // face
+    ctx.fillStyle = '#ffd9c7'; ctx.beginPath(); ctx.ellipse(0,0,82,100,0,0,Math.PI*2); ctx.fill();
+    // eyes
+    ctx.fillStyle = '#001'; ctx.beginPath(); ctx.ellipse(-22,-8,8,5,0,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(22,-8,8,5,0,0,Math.PI*2); ctx.fill();
+    // hair stylized
+    ctx.fillStyle = '#2b2b2b'; ctx.beginPath(); ctx.ellipse(0,-78,120,72,0,0,Math.PI*2); ctx.fill();
+    // smile
+    ctx.strokeStyle = '#8b3'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0,22,26,0.18,Math.PI-0.18); ctx.stroke();
+    ctx.restore();
+
+    // small floating decorative dots
+    for(let i=0;i<10;i++){
+      ctx.beginPath();
+      const x = 40*Math.cos(i + t*0.6) + (W-120);
+      const y = 20*Math.sin(i*1.3 + t*0.9) + 70;
+      ctx.fillStyle = `rgba(125,211,252,${0.06 + 0.04*Math.sin(t+i)})`;
+      ctx.fillRect(x,y,24,24);
+      ctx.closePath();
+    }
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* -----------------------
+   model-viewer controls
+   ----------------------- */
+const mv = document.getElementById('mv');
+document.getElementById('toggleAuto').addEventListener('click', ()=>{
+  if(mv.hasAttribute('auto-rotate')) mv.removeAttribute('auto-rotate');
+  else mv.setAttribute('auto-rotate','');
+});
+document.getElementById('downloadModel').addEventListener('click', ()=>{
+  window.open(mv.getAttribute('src'), '_blank');
+});
+
+/* -----------------------
+   Contact form localStorage + file preview
+   ----------------------- */
+const form = document.getElementById('contactForm');
+const nameIn = document.getElementById('name');
+const emailIn = document.getElementById('email');
+const messageIn = document.getElementById('message');
+const birthday = document.getElementById('birthday');
+const colorInput = document.getElementById('favcolor');
+const fileInput = document.getElementById('file');
+
+// submit -> "send" demo (saves locally)
+form.addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const payload = {
+    name: nameIn.value,
+    email: emailIn.value,
+    message: messageIn.value,
+    birthday: birthday.value,
+    color: colorInput ? colorInput.value : ''
+  };
+  // save to localStorage as a demo of persistence
+  localStorage.setItem('rp_message', JSON.stringify(payload));
+  alert('Thanks! Your message is saved locally (demo).');
+  form.reset();
+});
+
+// Save/load/clear buttons
+document.getElementById('saveLocal').addEventListener('click', ()=>{
+  const payload = {
+    name: nameIn.value, email: emailIn.value, message: messageIn.value,
+    birthday: birthday.value
+  };
+  localStorage.setItem('rp_form', JSON.stringify(payload));
+  alert('Saved form locally ✅');
+});
+document.getElementById('loadLocal').addEventListener('click', ()=>{
+  const raw = localStorage.getItem('rp_form');
+  if(!raw){ alert('No saved form found'); return; }
+  const data = JSON.parse(raw);
+  nameIn.value = data.name || '';
+  emailIn.value = data.email || '';
+  messageIn.value = data.message || '';
+  birthday.value = data.birthday || '';
+  alert('Loaded form from storage');
+});
+document.getElementById('clearLocal').addEventListener('click', ()=>{
+  localStorage.removeItem('rp_form');
+  localStorage.removeItem('rp_message');
+  alert('Cleared saved form');
+});
+
+// file preview: open preview in a new small window
+fileInput.addEventListener('change', (ev)=>{
+  const f = ev.target.files[0];
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    const w = window.open('', '_blank', 'width=520,height=480');
+    if(!w){ alert('Popups blocked. Please allow popups for preview.'); return; }
+    const html = `
+      <html><head><title>Preview</title></head>
+      <body style="margin:0;background:#111;display:flex;align-items:center;justify-content:center">
+      <img src="${e.target.result}" style="max-width:92%;max-height:92%;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,0.6)">
+      </body></html>`;
+    w.document.write(html);
+  };
+  reader.readAsDataURL(f);
+});
+
+/* -----------------------
+   Accessibility: keyboard shortcuts
+   ----------------------- */
+// Press 't' to toggle theme sequence a->f->m
+document.addEventListener('keydown', (e)=>{
+  if(e.key.toLowerCase()==='t'){
+    const order = ['a','f','m'];
+    const cur = site.dataset.theme || 'a';
+    let idx = order.indexOf(cur);
+    idx = (idx+1) % order.length;
+    applyTheme(order[idx]);
+    // update visual theme buttons
+    themeBtns.forEach(b=>b.classList.toggle('active', b.dataset.theme===order[idx]));
+  }
+});
+
+/* -----------------------
+   Init UI state from storage
+   ----------------------- */
+(function init(){
+  const stored = localStorage.getItem('rp_theme');
+  if(stored) applyTheme(stored);
+  const tonePref = localStorage.getItem('rp_tone') || 'friendly';
+  document.getElementById('toneSelect').value = tonePref;
+  // show/hide sections according to tone
+  tone.dispatchEvent(new Event('change'));
+})();
+
+// when user changes tone, save preference
+document.getElementById('toneSelect').addEventListener('change', ()=>{
+  localStorage.setItem('rp_tone', document.getElementById('toneSelect').value);
+});
+</script>
 </body>
 </html>
